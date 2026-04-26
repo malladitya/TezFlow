@@ -34,7 +34,7 @@ const ROUTE_BYPASS_FALLBACK = [
   [31.6340, 74.8723],  // Amritsar (destination)
 ];
 
-const PUNJAB_ROUTE_MAIN = [
+let PUNJAB_ROUTE_MAIN = [
   [27.1767, 78.0081], // Agra (start)
   [28.4595, 77.0266], // Gurugram corridor
   [30.7333, 76.7794], // Chandigarh
@@ -42,12 +42,21 @@ const PUNJAB_ROUTE_MAIN = [
   [31.6340, 74.8723], // Amritsar (destination)
 ];
 
-const PUNJAB_ROUTE_BYPASS = [
-  [27.1767, 78.0081], // Agra (start)
-  [28.9845, 77.7064], // Karnal corridor
-  [30.7333, 76.7794], // Chandigarh
-  [32.2643, 75.6492], // Pathankot safe pass
-  [31.6340, 74.8723], // Amritsar
+let PUNJAB_ROUTE_BYPASS = [
+  [27.1767, 78.0081], // 1. Agra (Origin)
+  [28.1487, 77.3320], // 2. Palwal
+  [28.4089, 77.3178], // 3. Faridabad (skirting NCR)
+  [28.7041, 77.1025], // 4. Delhi Outer Ring
+  [28.9931, 77.0198], // 5. Sonipat
+  [29.3909, 76.9635], // 6. Panipat Bypass
+  [29.6857, 76.9905], // 7. Karnal (NH-44 alternate)
+  [29.9691, 76.8198], // 8. Kurukshetra
+  [30.3752, 76.7821], // 9. Ambala
+  [30.7333, 76.7794], // 10. Chandigarh (Safe Zone)
+  [31.1471, 75.3412], // 11. Moga Peripheral
+  [31.4503, 75.1489], // 12. Tarn Taran Bypass
+  [31.5204, 74.8723], // 13. Amritsar South
+  [31.6340, 74.8723], // 14. Amritsar Golden City (Final)
 ];
 
 let ROUTE_MAIN = [...ROUTE_MAIN_FALLBACK];
@@ -80,9 +89,11 @@ const ROUTE_BYPASS_SNAPSHOT = _normalizeRoutePoints(ROUTE_SNAPSHOT?.bypass);
 
 if (ROUTE_MAIN_SNAPSHOT.length > 20) {
   ROUTE_MAIN = ROUTE_MAIN_SNAPSHOT;
+  PUNJAB_ROUTE_MAIN = ROUTE_MAIN_SNAPSHOT;
 }
 if (ROUTE_BYPASS_SNAPSHOT.length > 20) {
   ROUTE_BYPASS = ROUTE_BYPASS_SNAPSHOT;
+  PUNJAB_ROUTE_BYPASS = ROUTE_BYPASS_SNAPSHOT;
 }
 
 function _cleanOrsKey(value) {
@@ -201,7 +212,8 @@ function setPunjabDemoRoute() {
 }
 
 function setFloodBypassRoute() {
-  _setRouteSet(PUNJAB_ROUTE_MAIN, PUNJAB_ROUTE_BYPASS, "punjab-demo-flood");
+  // In flood mode, we force the active route (ROUTE_MAIN) to be the high-fidelity bypass corridor
+  _setRouteSet(PUNJAB_ROUTE_BYPASS, PUNJAB_ROUTE_MAIN, "punjab-demo-flood");
   _refreshRouteLayers();
   return getRouteStatus();
 }
@@ -314,27 +326,6 @@ async function _fetchOrsRoute(waypoints) {
 async function loadRealRoutes() {
   if (_realRoutesPromise) return _realRoutesPromise;
 
-  // Keep the Punjab demo route if an incident is active.
-  const incidentState = typeof getNSCNSIncidentState === 'function' ? getNSCNSIncidentState() : null;
-  if (incidentState && incidentState.incident === 'punjab_flood') {
-    _setRouteSet(PUNJAB_ROUTE_MAIN, PUNJAB_ROUTE_BYPASS, incidentState.status === 'active' ? 'punjab-demo-active' : 'punjab-demo');
-    _routeStatus.initialized = true;
-    _routeStatus.usingRealMain = false;
-    _routeStatus.usingRealBypass = false;
-    _routeStatus.providerMain = 'Punjab Demo';
-    _routeStatus.providerBypass = 'Punjab Demo';
-    _routeStatus.error = null;
-    _realRoutesPromise = Promise.resolve({
-      main: ROUTE_MAIN,
-      bypass: ROUTE_BYPASS,
-      usingRealMain: false,
-      usingRealBypass: false,
-      providerMain: 'Punjab Demo',
-      providerBypass: 'Punjab Demo',
-    });
-    return _realRoutesPromise;
-  }
-
   // Hard guarantee mode: if local route snapshot exists, use it immediately.
   if (ROUTE_MAIN_SNAPSHOT.length > 20 || ROUTE_BYPASS_SNAPSHOT.length > 20) {
     _routeStatus.initialized = true;
@@ -350,6 +341,15 @@ async function loadRealRoutes() {
     _routeMetrics.main = _estimateRouteMetrics(ROUTE_MAIN);
     _routeMetrics.bypass = _estimateRouteMetrics(ROUTE_BYPASS);
 
+    const incidentState = typeof getNSCNSIncidentState === 'function' ? getNSCNSIncidentState() : null;
+    if (incidentState && incidentState.incident === 'punjab_flood') {
+      if (incidentState.status === 'active' && incidentState.stage === 'rerouted') {
+        _setRouteSet(PUNJAB_ROUTE_BYPASS, PUNJAB_ROUTE_MAIN, 'punjab-demo-active');
+      } else {
+        _setRouteSet(PUNJAB_ROUTE_MAIN, PUNJAB_ROUTE_BYPASS, 'punjab-demo');
+      }
+    }
+
     _realRoutesPromise = Promise.resolve({
       main: ROUTE_MAIN,
       bypass: ROUTE_BYPASS,
@@ -363,21 +363,8 @@ async function loadRealRoutes() {
   }
 
   _realRoutesPromise = (async () => {
-    const mainSeed = [
-      [27.1767, 78.0081], // Agra
-      [28.4595, 77.0266], // Gurugram corridor
-      [30.7333, 76.7794], // Chandigarh
-      [30.9010, 75.8573], // Ludhiana
-      [31.6340, 74.8723], // Amritsar
-    ];
-
-    const bypassSeed = [
-      [27.1767, 78.0081], // Agra
-      [28.9845, 77.7064], // Karnal corridor
-      [30.7333, 76.7794], // Chandigarh
-      [32.2643, 75.6492], // Pathankot
-      [31.6340, 74.8723], // Amritsar
-    ];
+    const mainSeed = PUNJAB_ROUTE_MAIN;
+    const bypassSeed = PUNJAB_ROUTE_BYPASS;
 
     const [mainResult, bypassResult] = await Promise.all([
       _fetchBestRoute(mainSeed),
@@ -389,6 +376,7 @@ async function loadRealRoutes() {
 
     if (realMain?.length) {
       ROUTE_MAIN = realMain;
+      PUNJAB_ROUTE_MAIN = realMain;
       _routeMetrics.main = {
         distanceKm: mainResult.distanceKm || _estimateRouteMetrics(realMain).distanceKm,
         durationMin: mainResult.durationMin || _estimateRouteMetrics(realMain).durationMin,
@@ -397,6 +385,7 @@ async function loadRealRoutes() {
     }
     if (realBypass?.length) {
       ROUTE_BYPASS = realBypass;
+      PUNJAB_ROUTE_BYPASS = realBypass;
       _routeMetrics.bypass = {
         distanceKm: bypassResult.distanceKm || _estimateRouteMetrics(realBypass).distanceKm,
         durationMin: bypassResult.durationMin || _estimateRouteMetrics(realBypass).durationMin,
@@ -416,6 +405,16 @@ async function loadRealRoutes() {
     if (!_routeMetrics.main) _routeMetrics.main = _estimateRouteMetrics(ROUTE_MAIN);
     if (!_routeMetrics.bypass) _routeMetrics.bypass = _estimateRouteMetrics(ROUTE_BYPASS);
 
+    // Apply incident state if active, but now with real routes!
+    const incidentState = typeof getNSCNSIncidentState === 'function' ? getNSCNSIncidentState() : null;
+    if (incidentState && incidentState.incident === 'punjab_flood') {
+      if (incidentState.status === 'active' && incidentState.stage === 'rerouted') {
+        _setRouteSet(PUNJAB_ROUTE_BYPASS, PUNJAB_ROUTE_MAIN, 'punjab-demo-active');
+      } else {
+        _setRouteSet(PUNJAB_ROUTE_MAIN, PUNJAB_ROUTE_BYPASS, 'punjab-demo');
+      }
+    }
+
     return {
       main: ROUTE_MAIN,
       bypass: ROUTE_BYPASS,
@@ -433,6 +432,16 @@ async function loadRealRoutes() {
     _routeStatus.error = err?.message || "Failed to load routing data";
     _routeMetrics.main = _estimateRouteMetrics(ROUTE_MAIN);
     _routeMetrics.bypass = _estimateRouteMetrics(ROUTE_BYPASS);
+
+    // Still apply incident state even on fallback
+    const incidentState = typeof getNSCNSIncidentState === 'function' ? getNSCNSIncidentState() : null;
+    if (incidentState && incidentState.incident === 'punjab_flood') {
+      if (incidentState.status === 'active') {
+        _setRouteSet(PUNJAB_ROUTE_BYPASS, PUNJAB_ROUTE_MAIN, 'punjab-demo-active');
+      } else {
+        _setRouteSet(PUNJAB_ROUTE_MAIN, PUNJAB_ROUTE_BYPASS, 'punjab-demo');
+      }
+    }
 
     return {
       main: ROUTE_MAIN,

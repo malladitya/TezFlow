@@ -42,7 +42,20 @@ const outputs = {
   analysisDetail: document.getElementById("analysisDetail"),
   heartbeatStatus: document.getElementById("heartbeatStatus"),
   heartbeatDetail: document.getElementById("heartbeatDetail"),
+  geminiBriefStatus: document.getElementById("geminiBriefStatus"),
+  geminiBriefText: document.getElementById("geminiBriefText"),
+  geminiBriefList: document.getElementById("geminiBriefList"),
+  geminiStrategyStatus: document.getElementById("geminiStrategyStatus"),
+  geminiStrategyText: document.getElementById("geminiStrategyText"),
+  geminiStrategyList: document.getElementById("geminiStrategyList"),
+  geminiFingerprintStatus: document.getElementById("geminiFingerprintStatus"),
+  geminiFingerprintText: document.getElementById("geminiFingerprintText"),
+  geminiFingerprintList: document.getElementById("geminiFingerprintList"),
 };
+
+const geminiBriefBtn = document.getElementById("generateGeminiBriefBtn");
+const geminiStrategyBtn = document.getElementById("generateGeminiStrategyBtn");
+const geminiFingerprintBtn = document.getElementById("generateGeminiFingerprintBtn");
 
 const regions = [
   {
@@ -198,6 +211,9 @@ let lessons = loadLessons();
 let healingTimer = null;
 let analysisTimer = null;
 let weatherTimer = null;
+let geminiBriefPromise = null;
+let geminiStrategyPromise = null;
+let geminiFingerprintPromise = null;
 const analysisIntervalMs = 15000;
 const weatherRefreshIntervalMs = 10 * 60 * 1000;
 const liveOps = {
@@ -578,7 +594,25 @@ function buildExplainability(regionView) {
     },
   ];
 
-  return factors.sort((left, right) => right.impact - left.impact);
+  const sortedFactors = factors.sort((left, right) => right.impact - left.impact);
+  
+  // F10: @ai-model Explainable AI Reasoner
+  // Adds a natural-language 'AI Trace' to explain the current recommendation
+  const primaryFactor = sortedFactors[0];
+  let aiTrace = "Intelligence engine predicts stable throughput.";
+  
+  if (regionView.score >= 80) {
+    aiTrace = `CRITICAL: ${primaryFactor.label} is the primary stressor. Recommend immediate bypass via Haryana corridor and emergency tier-1 allocation.`;
+  } else if (regionView.score >= 60) {
+    aiTrace = `WATCH: Increasing ${primaryFactor.label} detected. Initiating preemptive rebalancing and monitoring public-private node sync.`;
+  } else if (regionView.score >= 40) {
+    aiTrace = `NOMINAL: Minor ${primaryFactor.label} drift. Standard routing protocols remain optimal.`;
+  }
+
+  const output = sortedFactors.map(f => `${f.label}: ${f.value} (+${f.impact} risk)`);
+  output.push(`\n🤖 AI INSIGHT: ${aiTrace}`);
+  
+  return output;
 }
 
 function buildAllocationPlan(regionViews) {
@@ -828,6 +862,285 @@ function updateRouteDataStatus() {
   }
 }
 
+function buildGeminiBriefContext() {
+  const region = getRegion(scenario.region);
+  const regionView = computeRegionView(region);
+  const routeStatus = typeof getRouteStatus === "function" ? getRouteStatus() : null;
+  const weatherInfo = liveWeather.byRegion[region.id] || null;
+
+  return {
+    region: regionView.label,
+    score: regionView.score,
+    state: regionView.state.label,
+    event: getEventProfile(scenario.event).label,
+    weather: weatherInfo
+      ? `${weatherInfo.summary}, ${weatherInfo.temperature}°C, pressure ${weatherInfo.pressure}/30`
+      : `Manual weather index ${scenario.weather}/100`,
+    route: routeStatus
+      ? `${routeStatus.providerMain} main route, ${computeRoutePressure(routeStatus)}/20 route pressure`
+      : "Route intelligence unavailable",
+    demand: scenario.demand,
+    traffic: scenario.traffic,
+    emergency: scenario.emergency,
+    offline: scenario.offline,
+  };
+}
+
+function renderGeminiBrief(data) {
+  if (outputs.geminiBriefStatus) {
+    outputs.geminiBriefStatus.textContent = data?.source === "gemini"
+      ? `Gemini ${data.model} active`
+      : `Local fallback brief: ${data.model}`;
+  }
+
+  if (outputs.geminiBriefText) {
+    outputs.geminiBriefText.textContent = data?.brief || "No briefing available.";
+  }
+
+  if (outputs.geminiBriefList) {
+    outputs.geminiBriefList.innerHTML = "";
+    const items = Array.isArray(data?.highlights) ? data.highlights : [];
+
+    items.forEach((entry) => {
+      const li = document.createElement("li");
+      li.textContent = entry;
+      outputs.geminiBriefList.appendChild(li);
+    });
+  }
+}
+
+function renderGeminiStrategy(data) {
+  if (outputs.geminiStrategyStatus) {
+    outputs.geminiStrategyStatus.textContent = data?.source === "gemini"
+      ? `Gemini ${data.model} active`
+      : `Local fallback strategy: ${data.model}`;
+  }
+
+  if (outputs.geminiStrategyText) {
+    outputs.geminiStrategyText.textContent = data?.brief || data?.summary || "No strategy available.";
+  }
+
+  if (outputs.geminiStrategyList) {
+    outputs.geminiStrategyList.innerHTML = "";
+    const items = Array.isArray(data?.highlights) ? data.highlights : [];
+
+    items.forEach((entry) => {
+      const li = document.createElement("li");
+      li.textContent = entry;
+      outputs.geminiStrategyList.appendChild(li);
+    });
+  }
+}
+
+function renderGeminiFingerprint(data) {
+  if (outputs.geminiFingerprintStatus) {
+    outputs.geminiFingerprintStatus.textContent = data?.source === "gemini"
+      ? `Gemini ${data.model} active`
+      : `Local fallback fingerprint: ${data.model}`;
+  }
+
+  if (outputs.geminiFingerprintText) {
+    outputs.geminiFingerprintText.textContent = data?.summary || "No fingerprint available.";
+  }
+
+  if (outputs.geminiFingerprintList) {
+    outputs.geminiFingerprintList.innerHTML = "";
+    const items = Array.isArray(data?.vectorPreview) ? data.vectorPreview : [];
+
+    items.forEach((value, index) => {
+      const li = document.createElement("li");
+      li.textContent = `v${index + 1}: ${value}`;
+      outputs.geminiFingerprintList.appendChild(li);
+    });
+  }
+}
+
+async function refreshGeminiBrief(force = false) {
+  if (!outputs.geminiBriefText) {
+    return;
+  }
+
+  if (geminiBriefPromise && !force) {
+    return geminiBriefPromise;
+  }
+
+  const context = buildGeminiBriefContext();
+
+  if (outputs.geminiBriefStatus) {
+    outputs.geminiBriefStatus.textContent = "Requesting Gemini briefing...";
+  }
+
+  if (geminiBriefBtn) {
+    geminiBriefBtn.disabled = true;
+  }
+
+  geminiBriefPromise = fetch("/api/gemini-brief", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(context),
+  })
+    .then(async (response) => {
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.error || `Gemini brief request failed (${response.status})`);
+      }
+
+      renderGeminiBrief(payload);
+      return payload;
+    })
+    .catch((error) => {
+      const fallbackBrief = {
+        source: "fallback",
+        model: "local-summary",
+        brief: `Local brief: ${context.region} is in ${context.state} state with ${context.event.toLowerCase()} conditions and route pressure at ${context.route}.`,
+        highlights: [
+          `Region score: ${context.score}/100`,
+          `Weather: ${context.weather}`,
+          `Traffic load: ${context.traffic}/100`,
+        ],
+        error: error.message,
+      };
+
+      renderGeminiBrief(fallbackBrief);
+      return fallbackBrief;
+    })
+    .finally(() => {
+      if (geminiBriefBtn) {
+        geminiBriefBtn.disabled = false;
+      }
+      geminiBriefPromise = null;
+    });
+
+  return geminiBriefPromise;
+}
+
+async function refreshGeminiStrategy(force = false) {
+  if (!outputs.geminiStrategyText) {
+    return;
+  }
+
+  if (geminiStrategyPromise && !force) {
+    return geminiStrategyPromise;
+  }
+
+  const context = buildGeminiBriefContext();
+
+  if (outputs.geminiStrategyStatus) {
+    outputs.geminiStrategyStatus.textContent = "Requesting Gemini strategy memo...";
+  }
+
+  if (geminiStrategyBtn) {
+    geminiStrategyBtn.disabled = true;
+  }
+
+  geminiStrategyPromise = fetch("/api/gemini-brief", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...context, action: "strategy" }),
+  })
+    .then(async (response) => {
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.error || `Gemini strategy request failed (${response.status})`);
+      }
+
+      renderGeminiStrategy(payload);
+      return payload;
+    })
+    .catch((error) => {
+      const fallback = {
+        source: "fallback",
+        model: "local-summary",
+        brief: `Local strategy: prioritize ${context.region} and keep protected lanes open while route pressure remains at ${context.route}.`,
+        highlights: [
+          `Score: ${context.score}/100`,
+          `Weather: ${context.weather}`,
+          `Demand: ${context.demand}/100`,
+        ],
+        error: error.message,
+      };
+
+      renderGeminiStrategy(fallback);
+      return fallback;
+    })
+    .finally(() => {
+      if (geminiStrategyBtn) {
+        geminiStrategyBtn.disabled = false;
+      }
+      geminiStrategyPromise = null;
+    });
+
+  return geminiStrategyPromise;
+}
+
+async function refreshGeminiFingerprint(force = false) {
+  if (!outputs.geminiFingerprintText) {
+    return;
+  }
+
+  if (geminiFingerprintPromise && !force) {
+    return geminiFingerprintPromise;
+  }
+
+  const context = buildGeminiBriefContext();
+
+  if (outputs.geminiFingerprintStatus) {
+    outputs.geminiFingerprintStatus.textContent = "Requesting Gemini embeddings...";
+  }
+
+  if (geminiFingerprintBtn) {
+    geminiFingerprintBtn.disabled = true;
+  }
+
+  geminiFingerprintPromise = fetch("/api/gemini-brief", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...context, action: "fingerprint" }),
+  })
+    .then(async (response) => {
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.error || `Gemini embedding request failed (${response.status})`);
+      }
+
+      renderGeminiFingerprint(payload);
+      return payload;
+    })
+    .catch((error) => {
+      const fallback = {
+        source: "fallback",
+        model: "local-summary",
+        summary: `Local fingerprint derived from score ${context.score}, demand ${context.demand}, and traffic ${context.traffic}.`,
+        vectorPreview: [
+          (context.score / 100).toFixed(3),
+          (context.demand / 100).toFixed(3),
+          (context.traffic / 100).toFixed(3),
+        ],
+        error: error.message,
+      };
+
+      renderGeminiFingerprint(fallback);
+      return fallback;
+    })
+    .finally(() => {
+      if (geminiFingerprintBtn) {
+        geminiFingerprintBtn.disabled = false;
+      }
+      geminiFingerprintPromise = null;
+    });
+
+  return geminiFingerprintPromise;
+}
+
 function render() {
   const region = getRegion(scenario.region);
   const eventProfile = getEventProfile(scenario.event);
@@ -871,6 +1184,21 @@ function render() {
   }
 
   renderList(outputs.explainList, explainability, true);
+  
+  // Handle AI Insight formatting specifically
+  if (outputs.explainList) {
+    const items = outputs.explainList.querySelectorAll('li');
+    items.forEach(li => {
+      if (li.textContent.includes('🤖 AI INSIGHT:')) {
+        li.style.color = 'var(--secondary)';
+        li.style.fontWeight = '700';
+        li.style.borderTop = '1px solid var(--glass-border)';
+        li.style.marginTop = '0.5rem';
+        li.style.paddingTop = '0.5rem';
+        li.style.fontSize = '0.85rem';
+      }
+    });
+  }
   renderList(outputs.allocationList, allocationPlan);
   renderList(outputs.forecastList, forecast.items);
   renderList(outputs.policyList, policyAssessment.items);
@@ -1491,6 +1819,28 @@ if (typeof loadRealRoutes === 'function') {
 }
 
 render();
+
+if (geminiBriefBtn) {
+  geminiBriefBtn.addEventListener("click", () => {
+    refreshGeminiBrief(true);
+  });
+}
+
+if (geminiStrategyBtn) {
+  geminiStrategyBtn.addEventListener("click", () => {
+    refreshGeminiStrategy(true);
+  });
+}
+
+if (geminiFingerprintBtn) {
+  geminiFingerprintBtn.addEventListener("click", () => {
+    refreshGeminiFingerprint(true);
+  });
+}
+
+refreshGeminiBrief();
+refreshGeminiStrategy();
+refreshGeminiFingerprint();
 
 // Interactivity for Conceptual Features
 document.addEventListener("DOMContentLoaded", () => {

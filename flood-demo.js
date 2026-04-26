@@ -61,8 +61,8 @@ const FLOOD_DEMO = {
     {
       id: 3,
       emoji: "🔄",
-      title: "Self-Healing: 1,200 Vehicles Auto-Rerouted",
-      description: "Modified Dijkstra algorithm found 2 bypass routes via Haryana & Rajasthan. Fleet auto-redirected in 4.2 minutes.",
+      title: "AI Auto-Reroute: 14-Point Bypass",
+      description: "Neural engine calculated 14-point safe corridor avoiding flood polygon. Auto-rerouting 1,200 vehicles via Haryana-Rajasthan path.",
       feature: "2. Self-Healing Supply Chain",
       delay: 6200,
       duration: 2500,
@@ -101,13 +101,13 @@ const FLOOD_DEMO = {
     {
       id: 7,
       emoji: "📊",
-      title: "Situation Stabilizing — Score 92→67",
-      description: "Emergency supplies in transit. Memory System updated. Policy simulation ran Resilience Mode. Score dropping.",
+      title: "Optimization Complete",
+      description: "Bypass route validated. Resource levels stabilized via Dynamic Allocation. Chaos Score 92→35. Operational integrity restored.",
       feature: "9. Memory Learning System",
       delay: 18200,
       duration: 2500,
       mapFn: "step7_stabilize",
-      scenarioPatch: { weather: 60, traffic: 55, emergency: true },
+      scenarioPatch: { weather: 35, traffic: 40, emergency: false, region: "north" },
     },
   ],
 

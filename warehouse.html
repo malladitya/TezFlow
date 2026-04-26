@@ -256,6 +256,7 @@
         </div>
         
         <button class="btn approve-btn" id="approveTransferBtn">Approve Transfer</button>
+        <button class="btn btn-alert" id="triggerFloodBtn" style="background:rgba(255,107,107,0.1); color:var(--risk); border:1px solid var(--risk); margin-left:0.5rem;">🚨 Report Node Crisis</button>
         <span id="transferFeedback" style="margin-left: 1rem; color: var(--ok); display: none; font-weight: bold;">Transfer Approved. Fleet is executing.</span>
       </section>
 
@@ -538,6 +539,36 @@
 
     if (window.innerWidth <= 768) {
       document.body.classList.add('has-bottom-nav');
+    }
+
+    // ── Trigger Local Node Emergency ────────────────────────
+    const triggerFloodBtn = document.getElementById('triggerFloodBtn');
+    if (triggerFloodBtn) {
+      triggerFloodBtn.addEventListener('click', () => {
+        if (typeof emitMapEvent === 'function') {
+          emitMapEvent(EVT.INCIDENT_MODE, {
+            incident: 'punjab_flood',
+            status: 'active',
+            stage: 'rerouted',
+            source: 'Warehouse Node'
+          });
+          
+          // Add to local audit log if available
+          const auditLogsList = document.getElementById('auditLogsList');
+          if (auditLogsList) {
+            const item = document.createElement('li');
+            item.innerHTML = `<span style="color:var(--muted)">[${new Date().toLocaleTimeString()}]</span> <span style="color:var(--risk)">CRITICAL: Local node reporting flood impact. Alerting HQ and Fleet.</span>`;
+            auditLogsList.prepend(item);
+          }
+          
+          triggerFloodBtn.disabled = true;
+          triggerFloodBtn.textContent = '⚠️ Crisis Reported';
+          
+          if (typeof _driverNotify === 'function') {
+            _driverNotify('🚨 Crisis signal transmitted to National HQ.');
+          }
+        }
+      });
     }
   </script>
 </body>

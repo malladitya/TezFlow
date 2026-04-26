@@ -90,7 +90,7 @@
     <section id="home" class="bento-cell span-8 row-4 glass-card reveal">
       <div class="hero-copy">
         <p class="eyebrow" style="color: var(--secondary);">Velocity Intelligence Platform</p>
-        <h1 style="background: linear-gradient(to bottom right, #FFFFFF 40%, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TezFlow: Intelligent Supply Chain Dynamics</h1>
+        <h1 style="background: linear-gradient(to bottom right, #FFFFFF 40%, var(--primary)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TezFlow: Intelligent Supply Chain Dynamics</h1>
         <p class="hero-lead">
           Continuous resilience analytics and predictive risk orchestration. We synchronize your entire national network through an adaptive "Nature-Tech" ecosystem.
         </p>
@@ -236,6 +236,61 @@
           <div class="heat-cell balanced">Balanced</div>
           <div class="heat-cell surplus">Surplus</div>
         </div>
+      </div>
+    </section>
+
+    <section id="ai-briefing" class="section">
+      <div class="container ai-briefing-grid">
+        <div class="ai-briefing-copy reveal">
+          <p class="eyebrow">Google AI Pilot</p>
+          <h2 class="section-title">Gemini powers three cloud AI workstreams for operations</h2>
+          <p>
+            TezFlow sends live HQ state to Vercel serverless routes that call Google AI services for a dispatch brief,
+            a strategy memo, and an embeddings-based signal fingerprint.
+          </p>
+          <div class="ai-briefing-meta">
+            <span>Cloud runtime: Vercel</span>
+            <span>Gemini 1.5 Flash</span>
+            <span>Gemini 1.5 Pro</span>
+            <span>text-embedding-004</span>
+          </div>
+          <button class="btn" id="generateGeminiBriefBtn" type="button">Generate Gemini Brief</button>
+          <button class="btn btn-ghost" id="generateGeminiStrategyBtn" type="button" style="margin-left:0.75rem;">Generate Strategy Memo</button>
+          <button class="btn btn-ghost" id="generateGeminiFingerprintBtn" type="button" style="margin-left:0.75rem;">Generate Fingerprint</button>
+        </div>
+        <aside class="ai-briefing-panel glass-card reveal">
+          <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:1rem;">
+            <div>
+              <h3 style="margin-bottom:0.25rem;">Live briefing</h3>
+              <p id="geminiBriefStatus" style="font-size:0.85rem; color: var(--text-muted);">Waiting for a Gemini request</p>
+            </div>
+            <span class="eyebrow" style="margin:0;">AI Dispatch</span>
+          </div>
+          <p id="geminiBriefText" style="color: var(--text-main); line-height: 1.7; margin-bottom: 1rem;">Press the button to generate a cloud-backed briefing.</p>
+          <ul id="geminiBriefList" class="brief-list"></ul>
+        </aside>
+        <aside class="ai-briefing-panel glass-card reveal">
+          <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:1rem;">
+            <div>
+              <h3 style="margin-bottom:0.25rem;">Strategy memo</h3>
+              <p id="geminiStrategyStatus" style="font-size:0.85rem; color: var(--text-muted);">Waiting for a strategy request</p>
+            </div>
+            <span class="eyebrow" style="margin:0;">AI Plan</span>
+          </div>
+          <p id="geminiStrategyText" style="color: var(--text-main); line-height: 1.7; margin-bottom: 1rem;">Generate a higher-order plan for disruption response.</p>
+          <ul id="geminiStrategyList" class="brief-list"></ul>
+        </aside>
+        <aside class="ai-briefing-panel glass-card reveal">
+          <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:1rem;">
+            <div>
+              <h3 style="margin-bottom:0.25rem;">Signal fingerprint</h3>
+              <p id="geminiFingerprintStatus" style="font-size:0.85rem; color: var(--text-muted);">Waiting for an embeddings request</p>
+            </div>
+            <span class="eyebrow" style="margin:0;">AI Vector</span>
+          </div>
+          <p id="geminiFingerprintText" style="color: var(--text-main); line-height: 1.7; margin-bottom: 1rem;">Generate an embeddings fingerprint from the current state.</p>
+          <ul id="geminiFingerprintList" class="brief-list"></ul>
+        </aside>
       </div>
     </section>
 

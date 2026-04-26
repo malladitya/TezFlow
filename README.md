@@ -2,6 +2,8 @@
 
 Resilient Logistics and Dynamic Supply Chain Optimization prototype.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
 TezFlow continuously analyzes transit and operational signals, detects disruption patterns early, and triggers route and allocation responses before localized failures cascade into broad delay.
 
 ## Objective Alignment
@@ -124,6 +126,36 @@ Still prototype-level:
 2. Persist decisions/events to backend for audit and replay.
 3. Move scoring/decision logic to server runtime.
 4. Add external alert integrations and SLA tracking.
+
+## Cloud Deployment
+
+TezFlow is deployment-ready as a cloud-hosted static app with Vercel serverless functions for three Google AI capabilities.
+
+Primary deployment path:
+
+1. Push the repository to Vercel or connect it through GitHub.
+2. Set `GEMINI_API_KEY` in the Vercel project environment variables.
+3. Optionally set `GEMINI_FLASH_MODEL`, `GEMINI_PRO_MODEL`, and `GEMINI_EMBEDDING_MODEL` to override the defaults.
+4. Deploy the project; the front end serves from the static root and the AI routes run from `/api/gemini-brief`.
+
+Quick checklist:
+
+1. Copy `.env.example` locally if you want a template for environment values.
+2. Add `GEMINI_API_KEY` in Vercel under Project Settings > Environment Variables.
+3. Keep `GEMINI_FLASH_MODEL` as `gemini-1.5-flash`, `GEMINI_PRO_MODEL` as `gemini-1.5-pro`, and `GEMINI_EMBEDDING_MODEL` as `text-embedding-004` unless you want to switch models.
+4. Redeploy after changing environment variables so the API route picks them up.
+
+The existing GitHub Pages workflow still publishes the static demo, but the Google AI briefing requires the cloud serverless deployment path.
+
+## Google AI Briefing
+
+The HQ screen now includes three Google AI-backed operational panels.
+
+- The browser sends the current scenario to a Vercel API route.
+- The API route calls Gemini 1.5 Flash for the dispatch brief.
+- The API route calls Gemini 1.5 Pro for the strategy memo.
+- The API route calls the Gemini embeddings service for a signal fingerprint.
+- If the key is missing, each panel falls back to a local summary so the UI remains usable.
 
 ---
 
