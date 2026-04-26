@@ -1,162 +1,103 @@
-# TezFlow - National Logistics Intelligence Platform
+<div align="center">
+  <img src="assets/Logo2.png.png" alt="TezFlow Logo" width="200" />
+  <h1>TezFlow</h1>
+  <p><strong>National Logistics Intelligence & Supply Chain Optimization Platform</strong></p>
+  
+  [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+  [![UI: Earthbound Tactical](https://img.shields.io/badge/UI-Earthbound_Tactical-0f1419.svg)](https://github.com/)
+</div>
 
-Resilient Logistics and Dynamic Supply Chain Optimization prototype.
+<br>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
-
-TezFlow continuously analyzes transit and operational signals, detects disruption patterns early, and triggers route and allocation responses before localized failures cascade into broad delay.
-
-## Objective Alignment
-
-This implementation now supports:
-
-1. Continuous monitoring cycles (not just manual scenario runs).
-2. Preemptive disruption response through threshold-based rerouting.
-3. Dynamic route intelligence using real road geometry providers.
-4. Multi-signal fusion from weather, route status, and field operations.
-5. Shared heartbeat synchronization across HQ, Driver, and Warehouse views.
-
-## System Surfaces
-
-- HQ Control Center: `index.html`
-- Driver Dashboard: `driver.html`
-- Warehouse Dashboard: `warehouse.html`
-
-Core scripts:
-
-- `script.js` - HQ analysis engine, live weather ingestion, heartbeat emission.
-- `map.js` - route loading, route metrics, map overlays, event-driven coordination.
-- `features.js` - feature engines (chaos scoring, self-healing, prediction, allocation).
-- `events.js` - cross-page real-time event bus.
-- `supabase.js` - sync layer with BroadcastChannel fallback.
-
-## Live Data Inputs
-
-### Route Intelligence
-
-Provider chain:
-
-1. OpenRouteService (if API key is configured)
-2. OSRM Demo
-3. OSMDE Car
-4. Snapshot/fallback route
-
-Distance and duration metrics are extracted and used to derive live transit pressure.
-
-### Weather Intelligence
-
-The app pulls current weather from Open-Meteo per region and converts weather codes, precipitation, and wind into a normalized weather pressure signal.
-
-Refresh interval: every 10 minutes.
-
-### Operational Signals
-
-Real-time event bus receives:
-
-- Driver congestion reports
-- Driver reroute events
-- Driver delivery confirmations
-- Warehouse transfer approvals
-- HQ scenario updates
-- Shared system heartbeat
-
-These signals are reflected across all dashboards and influence HQ analysis behavior.
-
-## Local Run
-
-Run via local static server (for example VS Code Live Server), then open:
-
-- `http://localhost:5500/supplychain/index.html`
-- `http://localhost:5500/supplychain/driver.html`
-- `http://localhost:5500/supplychain/warehouse.html`
-
-Do not open files directly from disk; use HTTP server mode to avoid browser restrictions.
-
-## Optional OpenRouteService Key
-
-For improved route reliability, set ORS key in browser local storage:
-
-```js
-localStorage.setItem("nscns_ors_api_key", "YOUR_ORS_KEY");
-location.reload();
-```
-
-Then confirm route status indicates a live provider instead of fallback.
-
-## Fast Demo (3-5 Minutes)
-
-1. Open HQ, Driver, and Warehouse in separate tabs.
-2. In Driver, click congestion report.
-3. Verify event propagation:
-	- HQ shows elevated risk and new field signal.
-	- Warehouse map marks route disruption.
-4. Trigger reroute from Driver.
-5. Approve transfer from Warehouse.
-6. Confirm delivery from Driver.
-7. Verify shared heartbeat and synchronized state across all tabs.
-
-## Verification Checklist
-
-- Analysis cycle updates continuously.
-- HQ weather panel shows live external feed values.
-- HQ transit panel shows provider plus route distance/duration.
-- Driver congestion appears in HQ and Warehouse.
-- Reroute clears congestion and updates route state.
-- Warehouse transfer propagates to HQ and Driver.
-- Delivery confirmation propagates to HQ and Warehouse.
-- System heartbeat remains in sync across all three screens.
-
-## Scope Notes
-
-Real in this prototype:
-
-- External weather integration
-- Real route-provider integration and route metrics
-- Real-time cross-page event synchronization
-
-Still prototype-level:
-
-- No dedicated enterprise traffic API integration yet
-- No backend model training/inference service
-- No production auth hardening
-
-## Suggested Next Steps
-
-1. Add commercial traffic API for direct congestion telemetry.
-2. Persist decisions/events to backend for audit and replay.
-3. Move scoring/decision logic to server runtime.
-4. Add external alert integrations and SLA tracking.
-
-## Cloud Deployment
-
-TezFlow is deployment-ready as a cloud-hosted static app with Vercel serverless functions for three Google AI capabilities.
-
-Primary deployment path:
-
-1. Push the repository to Vercel or connect it through GitHub.
-2. Set `GEMINI_API_KEY` in the Vercel project environment variables.
-3. Optionally set `GEMINI_FLASH_MODEL`, `GEMINI_PRO_MODEL`, and `GEMINI_EMBEDDING_MODEL` to override the defaults.
-4. Deploy the project; the front end serves from the static root and the AI routes run from `/api/gemini-brief`.
-
-Quick checklist:
-
-1. Copy `.env.example` locally if you want a template for environment values.
-2. Add `GEMINI_API_KEY` in Vercel under Project Settings > Environment Variables.
-3. Keep `GEMINI_FLASH_MODEL` as `gemini-1.5-flash`, `GEMINI_PRO_MODEL` as `gemini-1.5-pro`, and `GEMINI_EMBEDDING_MODEL` as `text-embedding-004` unless you want to switch models.
-4. Redeploy after changing environment variables so the API route picks them up.
-
-The existing GitHub Pages workflow still publishes the static demo, but the Google AI briefing requires the cloud serverless deployment path.
-
-## Google AI Briefing
-
-The HQ screen now includes three Google AI-backed operational panels.
-
-- The browser sends the current scenario to a Vercel API route.
-- The API route calls Gemini 1.5 Flash for the dispatch brief.
-- The API route calls Gemini 1.5 Pro for the strategy memo.
-- The API route calls the Gemini embeddings service for a signal fingerprint.
-- If the key is missing, each panel falls back to a local summary so the UI remains usable.
+**TezFlow** (NSCNS) is an enterprise-grade, resilient logistics prototype designed to dynamically optimize supply chains. It continuously analyzes transit and operational signals, detects disruption patterns early via AI, and triggers auto-rerouting and resource allocation before localized failures cascade into broad delays.
 
 ---
 
-NSCNS now demonstrates a connected, event-driven logistics control system that continuously analyzes, preempts, and synchronizes response across operational nodes.
+## ✨ Core Capabilities
+
+1. **Continuous Monitoring Cycles:** Replaces static scenario runs with an always-on, live-analyzing heartbeat engine.
+2. **Predictive Disruption Response:** Threshold-based auto-rerouting using a live "Chaos Score."
+3. **Dynamic Route Intelligence:** Fetches real-world geometry and distances using Open Source Routing Machine (OSRM) and OpenRouteService.
+4. **Multi-Signal Fusion:** Merges external live weather (Open-Meteo), active traffic status, and field operations into a single dashboard.
+5. **Cross-Terminal Synchronization:** A shared heartbeat powered by a `BroadcastChannel` event bus, keeping the National HQ, Warehouse, and Driver terminals perfectly in sync.
+
+## 🖥️ System Surfaces
+
+TezFlow is composed of three interconnected front-end terminals:
+
+| Terminal | Path | Description |
+| :--- | :--- | :--- |
+| **National HQ** | `index.html` / `hq.html` | High-level Command Center. Displays the Bento UI, Chaos Score, and live predictions. |
+| **Warehouse Dashboard** | `warehouse.html` | Logistics node view for managing inventory transfers and responding to dispatch requests. |
+| **Driver Portal** | `driver.html` | Edge-level view for fleet units to receive automated reroutes and report local road congestion. |
+
+## 📂 Project Structure
+
+```text
+supplychain/
+├── index.html           # Landing / Access Terminal
+├── hq.html              # National Command Center
+├── warehouse.html       # Warehouse / Dispatch Node
+├── driver.html          # Fleet / Driver Interface
+├── assets/              # Logos and UI assets
+├── css/                 
+│   └── styles.css       # Unified Earthbound Tactical Design System
+├── js/
+│   ├── script.js        # HQ analysis engine & core heartbeat
+│   ├── map.js           # Leaflet routing, rendering, & providers
+│   ├── events.js        # Real-time BroadcastChannel Event Bus
+│   ├── features.js      # Core intelligence modules (Chaos, Predictions)
+│   ├── flood-demo.js    # Cinematic Punjab Flood Demo sequencer
+│   ├── auth-check.js    # Firebase Auth logic
+│   └── supabase.js      # Cloud synchronization fallback
+├── data/
+│   └── route-snapshots.js # Offline, rate-limit-proof OSRM geometries
+└── docs/                
+    ├── working.md       # Demo recording script & walkthrough
+    └── presentation.md  # Extended project details
+```
+
+## 🚀 Quick Start (Local Run)
+
+TezFlow utilizes module imports and strict CORS rules for fetching external route geometries. It **must** be run via a local HTTP server.
+
+1. Clone the repository.
+2. Start a local static server (e.g., using VS Code Live Server, Python `http.server`, or Node `serve`).
+   ```bash
+   # Example using Python 3
+   python -m http.server 5500
+   ```
+3. Open the terminals in separate browser windows to test the real-time event bus:
+   - `http://localhost:5500/index.html`
+   - `http://localhost:5500/hq.html`
+   - `http://localhost:5500/driver.html`
+
+## 🎬 Running the Crisis Demo
+
+To demonstrate TezFlow's self-healing capabilities, you can trigger the **Punjab Flood Scenario**:
+
+1. Open **HQ Command** and **Driver Portal** in side-by-side windows.
+2. In the HQ top navigation bar, click the **🌊 Demo** button.
+3. Watch as the system detects the severe weather anomaly in Punjab, spikes the Chaos Score, and initiates the "Emergency Mode."
+4. Look at the Driver Portal map—witness the AI completely drop the flooded route and recalculate a massive 9,000+ point geometric bypass through Rajasthan in real-time.
+5. In HQ, observe the Dynamic Allocation engine automatically reroute food, fuel, and medical supplies to stabilize the region.
+
+## 🌩️ Live Data Integrations
+
+* **Route Intelligence:** Integrates with **OSRM Demo** and **OSMDE Car** to pull actual road networks instead of straight lines. Distances and estimated durations are fed into the transit pressure calculations. (Supports *OpenRouteService* with an optional API key).
+* **Weather Intelligence:** Fetches live weather constraints from **Open-Meteo** on a 10-minute cycle, instantly modifying the base friction of regional roads based on precipitation and wind conditions.
+
+## ☁️ Cloud Deployment
+
+TezFlow is fully deployment-ready as a static application on **Vercel** or **GitHub Pages**.
+
+To deploy with optional Google Gemini AI summaries enabled:
+1. Connect the repository to Vercel.
+2. In Vercel Project Settings > Environment Variables, add your `GEMINI_API_KEY`.
+3. Deploy! The front-end will serve statically, and the AI routes will execute via Vercel Serverless Functions (`/api/gemini-brief`).
+
+---
+<div align="center">
+  <i>"Predict the disruption. Preempt the delay."</i>
+</div>
