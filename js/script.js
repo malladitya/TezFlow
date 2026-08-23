@@ -569,21 +569,31 @@ function buildShortageForecast(primaryScore) {
 function buildExplainability(regionView) {
   const eventProfile = getEventProfile(scenario.event);
   const learningDiscount = getLearningDiscount(scenario.event);
+  const asFiniteNumber = (value, fallback = 0) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+  };
+  const weather = asFiniteNumber(scenario.weather);
+  const traffic = asFiniteNumber(scenario.traffic);
+  const demand = asFiniteNumber(scenario.demand);
+  const livePressure = asFiniteNumber(liveWeather.byRegion[regionView.id]?.pressure);
+  const weatherSensitivity = asFiniteNumber(regionView.weatherSensitivity, 1);
+  const trafficSensitivity = asFiniteNumber(regionView.trafficSensitivity, 1);
   const factors = [
     {
       label: "Weather pressure",
-      value: `${scenario.weather} manual / ${liveWeather.byRegion[regionView.id]?.pressure ?? 0} live`,
-      impact: Math.round((scenario.weather * 0.22 * 0.55 + (liveWeather.byRegion[regionView.id]?.pressure ?? 0) * 0.22 * 0.45) * regionView.weatherSensitivity),
+      value: `${weather} manual / ${livePressure} live`,
+      impact: Math.round((weather * 0.22 * 0.55 + livePressure * 0.22 * 0.45) * weatherSensitivity),
     },
     {
       label: "Traffic congestion",
-      value: scenario.traffic,
-      impact: Math.round(scenario.traffic * 0.21 * regionView.trafficSensitivity),
+      value: traffic,
+      impact: Math.round(traffic * 0.21 * trafficSensitivity),
     },
     {
       label: "Demand pressure",
-      value: scenario.demand,
-      impact: Math.round(scenario.demand * 0.18),
+      value: demand,
+      impact: Math.round(demand * 0.18),
     },
     {
       label: "Event awareness",
@@ -732,8 +742,14 @@ function renderList(target, values, withLabels = false) {
   target.innerHTML = "";
   values.forEach((entry) => {
     if (withLabels) {
-      const descriptor = entry.impact >= 0 ? `adds ${entry.impact} risk points` : `reduces ${Math.abs(entry.impact)} risk points`;
-      target.appendChild(createListItem(entry.label, descriptor, entry.impact >= 0 ? "risk" : "relief"));
+      if (typeof entry === "string") {
+        target.appendChild(createListItem("", entry));
+        return;
+      }
+
+      const impact = Number.isFinite(Number(entry.impact)) ? Number(entry.impact) : 0;
+      const descriptor = impact >= 0 ? `adds ${impact} risk points` : `reduces ${Math.abs(impact)} risk points`;
+      target.appendChild(createListItem(entry.label, descriptor, impact >= 0 ? "risk" : "relief"));
       return;
     }
 
