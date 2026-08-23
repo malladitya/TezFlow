@@ -216,8 +216,8 @@
       <div class="live-status-grid">
         <div class="live-status-card">
           <p class="eyebrow">HQ Sync</p>
-          <p class="stat-val" style="font-size:1.6rem; margin:0.35rem 0;" id="hqSyncState">Listening</p>
-          <p id="hqSyncDetail" style="color:var(--muted); font-size:0.9rem;">Waiting for scenario updates</p>
+          <p class="stat-val" style="font-size:1.6rem; margin:0.35rem 0;" id="hqSyncState">Connected</p>
+          <p id="hqSyncDetail" style="color:var(--muted); font-size:0.9rem;">Ready for HQ scenario updates</p>
         </div>
         <div class="live-status-card">
           <p class="eyebrow">Route Status</p>
@@ -405,6 +405,15 @@
       }
 
       refreshRouteStatus();
+      setHeartbeat('Connected', 'Warehouse node is ready for HQ updates', 'var(--ok)');
+
+      if (typeof loadRealRoutes === 'function') {
+        loadRealRoutes()
+          .catch(() => null)
+          .finally(() => {
+            refreshRouteStatus();
+          });
+      }
 
       const restoreIncidentState = () => {
         if (typeof getNSCNSIncidentState !== 'function') return;

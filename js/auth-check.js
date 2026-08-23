@@ -102,11 +102,12 @@
       return { ok: false, reason: "Invalid role selected." };
     }
 
-    const normalizedUser = _sanitize(username).trim().toLowerCase();
+    const normalizedUser = _sanitize(String(username || '')).trim().toLowerCase();
     const expectedUser = roleCfg.username.toLowerCase();
     const expectedPass = roleCfg.password;
+    const providedPass = String(password || '').trim();
 
-    if (normalizedUser !== expectedUser || password !== expectedPass) {
+    if (normalizedUser !== expectedUser || providedPass !== expectedPass) {
       return { ok: false, reason: "Invalid username or password for selected role." };
     }
 

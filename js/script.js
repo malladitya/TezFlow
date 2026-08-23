@@ -1616,11 +1616,11 @@ function wireControls() {
 
     const handler = () => {
       if (control === controls.stressRange) {
-        controls.weatherRange.value = control.value;
+        if (controls.weatherRange) controls.weatherRange.value = control.value;
         if (controls.trafficRange) controls.trafficRange.value = Math.round(control.value * 0.85);
         if (controls.demandRange) controls.demandRange.value = Math.round(control.value * 1.05);
       } else if (control === controls.weatherRange) {
-        controls.stressRange.value = control.value;
+        if (controls.stressRange) controls.stressRange.value = control.value;
       }
 
       syncFromControls();
