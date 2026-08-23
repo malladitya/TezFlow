@@ -42,6 +42,8 @@ const outputs = {
   analysisDetail: document.getElementById("analysisDetail"),
   heartbeatStatus: document.getElementById("heartbeatStatus"),
   heartbeatDetail: document.getElementById("heartbeatDetail"),
+  sapStatusValue: document.getElementById("sapStatusValue"),
+  sapStatusDetail: document.getElementById("sapStatusDetail"),
   geminiBriefStatus: document.getElementById("geminiBriefStatus"),
   geminiBriefText: document.getElementById("geminiBriefText"),
   geminiBriefList: document.getElementById("geminiBriefList"),
@@ -56,6 +58,7 @@ const outputs = {
 const geminiBriefBtn = document.getElementById("generateGeminiBriefBtn");
 const geminiStrategyBtn = document.getElementById("generateGeminiStrategyBtn");
 const geminiFingerprintBtn = document.getElementById("generateGeminiFingerprintBtn");
+const sapRerouteBtn = document.getElementById("triggerSapRerouteBtn");
 
 const regions = [
   {
@@ -819,6 +822,81 @@ function updateScoreDisplays(score, label) {
       node.style.color = state.color;
     }
   });
+}
+
+function getSapReroutePayload() {
+  const routeCode = scenario.emergency ? "CAPE_OF_GOOD_HOPE_01" : "REGIONAL_REROUTE_01";
+  const freightOrderId = `FO-${String(Math.floor(Math.random() * 90000) + 10000)}`;
+  const carrierMap = {
+    north: "CARRIER_MSC_01",
+    central: "CARRIER_DSV_02",
+    south: "CARRIER_MARITIME_03",
+    coastal: "CARRIER_CMA_04",
+  };
+
+  const primaryRegion = getRegion(scenario.region);
+  const estimatedCost = clamp(Math.round((scenario.demand + scenario.traffic + scenario.weather) * 420), 12000, 95000);
+
+  return {
+    freightOrderId,
+    newCarrierId: carrierMap[primaryRegion.id] || "CARRIER_MSC_01",
+    newRoute: routeCode,
+    estimatedCost,
+    isColdChain: scenario.emergency || primaryRegion.id === "south",
+  };
+}
+
+async function triggerSAPReroute() {
+  const payload = getSapReroutePayload();
+
+  if (outputs.sapStatusValue) {
+    outputs.sapStatusValue.textContent = "Queued";
+    outputs.sapStatusValue.style.color = "var(--warn)";
+  }
+
+  if (outputs.sapStatusDetail) {
+    outputs.sapStatusDetail.textContent = `Dispatching ${payload.freightOrderId} via ${payload.newRoute}`;
+  }
+
+  try {
+    const response = await fetch("/api/sap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || `SAP request failed (${response.status})`);
+    }
+
+    if (outputs.sapStatusValue) {
+      outputs.sapStatusValue.textContent = data.success ? "Live" : "Paused";
+      outputs.sapStatusValue.style.color = data.success ? "var(--ok)" : "var(--risk)";
+    }
+
+    if (outputs.sapStatusDetail) {
+      outputs.sapStatusDetail.textContent = data.success
+        ? `Executed ${payload.freightOrderId} · ${payload.newRoute}`
+        : `Blocked: ${data.error || "SAP request rejected"}`;
+    }
+
+    return data;
+  } catch (error) {
+    if (outputs.sapStatusValue) {
+      outputs.sapStatusValue.textContent = "Dry Run";
+      outputs.sapStatusValue.style.color = "var(--warn)";
+    }
+
+    if (outputs.sapStatusDetail) {
+      outputs.sapStatusDetail.textContent = `Local fallback: ${error.message}`;
+    }
+
+    return { success: false, error: error.message };
+  }
 }
 
 function updateRouteDataStatus() {
@@ -1597,11 +1675,16 @@ function wireControls() {
   controls.healScenarioBtn?.addEventListener("click", () => {
     syncFromControls();
     activateHealing();
+    triggerSAPReroute();
   });
 
   controls.saveLessonBtn?.addEventListener("click", () => {
     syncFromControls();
     pushLesson();
+  });
+
+  sapRerouteBtn?.addEventListener("click", () => {
+    triggerSAPReroute();
   });
 }
 

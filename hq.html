@@ -339,6 +339,7 @@
         <a href="index.html" class="btn btn-small btn-ghost">Home</a>
         <a href="warehouse.html" class="btn btn-small btn-ghost">Warehouse</a>
         <a href="driver.html" class="btn btn-small btn-ghost">Driver</a>
+        <button id="triggerSapRerouteBtn" class="btn btn-small" style="background:rgba(96,255,182,0.12); border-color: rgba(96,255,182,0.35);">SAP Reroute</button>
         <button onclick="startPunjabFloodDemo()" class="btn btn-small" style="background:rgba(255,68,68,0.9);">🌊 Demo</button>
         <button onclick="logout()" class="btn btn-small">Logout</button>
       </div>
@@ -357,18 +358,18 @@
 
     <div class="hq-grid reveal">
       <section class="hq-panel">
-        <h1 class="hq-title">Command & Control Surface</h1>
-        <p class="hq-sub">High-velocity supply chain orchestration and predictive risk analytics.</p>
+        <h1 class="hq-title">TezFlow: SAP + Gemini Agentic Control Plane</h1>
+        <p class="hq-sub">Continuous resilience sensing, autonomous scenario modeling, and SAP-integrated rerouting to protect global supply lines against geopolitical shocks, tariff volatility, and climate disruption.</p>
         <div class="mini-score mobile-hide">
           <div class="card">
-            <div class="label">Chaos Score</div>
+            <div class="label">Disruption Signal Index</div>
             <div class="value" id="heroChaosScore">62</div>
-            <small id="heroChaosState" style="color:var(--warn)">Watch Zone</small>
+            <small id="heroChaosState" style="color:var(--warn)">Maritime + tariff watch</small>
           </div>
           <div class="card">
-            <div class="label">Route Feed</div>
+            <div class="label">SAP Route Execution</div>
             <div class="value" id="heartbeatStatus">Syncing</div>
-            <small id="heartbeatDetail" style="color:var(--muted)">Awaiting shared state</small>
+            <small id="heartbeatDetail" style="color:var(--muted)">IBP/TM orchestration active</small>
           </div>
         </div>
       </section>
@@ -382,29 +383,34 @@
 
     <div class="status-strip">
       <div class="status-chip">
-        <span class="status-label">Chaos Score</span>
+        <span class="status-label">Maritime Security</span>
         <strong id="chaosScore">62</strong>
-        <small id="chaosState">High Alert</small>
+        <small id="chaosState">Cape reroute active</small>
       </div>
       <div class="status-chip">
-        <span class="status-label">Predicted Shortage</span>
+        <span class="status-label">Tariff Volatility</span>
         <strong id="forecastValue">Moderate</strong>
-        <small id="forecastDetail">Buffers under watch</small>
+        <small id="forecastDetail">US tariff shock exposure</small>
       </div>
       <div class="status-chip">
-        <span class="status-label">Response Mode</span>
+        <span class="status-label">Scenario Mode</span>
         <strong id="responseMode">Standard</strong>
-        <small id="responseDetail">Balanced routing</small>
+        <small id="responseDetail">SAP reroute simulation active</small>
       </div>
       <div class="status-chip">
         <span class="status-label">Analysis Cycle</span>
         <strong id="analysisStatus">Watching</strong>
-        <small id="analysisDetail">Continuous monitoring active</small>
+        <small id="analysisDetail">Continuous disruption sensing</small>
       </div>
       <div class="status-chip">
         <span class="status-label">System Heartbeat</span>
         <strong id="heartbeatStatusMirror">Syncing</strong>
-        <small id="heartbeatDetailMirror">Awaiting global state</small>
+        <small id="heartbeatDetailMirror">IBP/TM + Gemini aligned</small>
+      </div>
+      <div class="status-chip">
+        <span class="status-label">SAP OData</span>
+        <strong id="sapStatusValue">Idle</strong>
+        <small id="sapStatusDetail">No reroute queued</small>
       </div>
     </div>
 
@@ -444,8 +450,8 @@
 
       <article class="dashboard-card">
         <div class="card-heading">
-          <h3>Multi-node AI</h3>
-          <p>Region-level decision state.</p>
+          <h3>Agent Coordination</h3>
+          <p>Region-level decision state across SAP and Gemini workflows.</p>
         </div>
         <div id="regionGrid" class="region-grid"></div>
       </article>
@@ -615,8 +621,8 @@
           id: 1,
           emoji: "🌊",
           title: "Punjab Flood Detected",
-          description: "IMD + ISRO satellite confirms severe flood near Ludhiana. 3 National Highways blocked. Chaos Score spiking.",
-          feature: "1. Chaos Score Engine",
+          description: "IMD + ISRO satellite confirms severe flood near Ludhiana. 3 National Highways blocked. Disruption signal index spiking.",
+          feature: "1. Disruption Sensing Agent",
           delay: 0,
           duration: 2800,
           mapFn: "step1_floodZone",
@@ -626,8 +632,8 @@
           id: 2,
           emoji: "🚨",
           title: "Emergency Response Activated",
-          description: "Score crossed 85 threshold. Emergency Mode ON. NDRF, Indian Army, and IRCS alerted. Non-essential cargo paused.",
-          feature: "6. Emergency Response Engine",
+          description: "Signal index crossed 85 threshold. Emergency Mode ON. NDRF, Indian Army, and IRCS alerted. Non-essential cargo paused.",
+          feature: "6. HITL Gatekeeper + Emergency Response",
           delay: 3200,
           duration: 2500,
           mapFn: "step2_emergencyCorridors",
@@ -665,9 +671,9 @@
         {
           id: 6,
           emoji: "🧩",
-          title: "Multi-Node AI Coordinating",
-          description: "North Hub AI (Delhi) taking autonomous control. 3 regional nodes operating independently. Central AI monitoring.",
-          feature: "5. Decentralized Multi-Node AI",
+          title: "SAP + Gemini Agent Coordination",
+          description: "North Hub agents (Delhi) taking autonomous control. 3 regional nodes operating independently. Central compliance and SAP orchestration monitoring.",
+          feature: "5. Compliance + Agent Coordination",
           delay: 15200,
           duration: 2500,
           mapFn: "step6_nodeStatus",
@@ -676,7 +682,7 @@
           id: 7,
           emoji: "📊",
           title: "Optimization Complete",
-          description: "Bypass route validated. Resource levels stabilized via Dynamic Allocation. Chaos Score 92→35. Operational integrity restored.",
+          description: "Bypass route validated. Resource levels stabilized via inventory rebalancing and SAP rerouting. Disruption signal index 92→35. Operational integrity restored.",
           feature: "9. Memory Learning System",
           delay: 18200,
           duration: 2500,

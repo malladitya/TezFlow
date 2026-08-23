@@ -58,28 +58,28 @@ Result: faster response time, fewer cascading failures, better resource utilizat
 ## 6. Process Flow Diagram (Mermaid)
 ```mermaid
 flowchart TD
-    A[Live Inputs\nWeather Route Traffic Demand Events] --> B[Signal Fusion Layer]
-    B --> C[Chaos Score Computation]
-    C --> D{Risk Band}
-    D -->|Stable| E[Monitor and Continue]
-    D -->|Watch| F[Preemptive Plan\nReroute + Allocation]
-    D -->|High Alert| G[Emergency Orchestration]
+	A[Live Inputs\nWeather Route Traffic Demand Events] --> B[Signal Fusion Layer]
+	B --> C[Chaos Score Computation]
+	C --> D{Risk Band}
+	D -->|Stable| E[Monitor and Continue]
+	D -->|Watch| F[Preemptive Plan\nReroute + Allocation]
+	D -->|High Alert| G[Emergency Orchestration]
 
-    C --> H[Google AI Services]
-    H --> H1[Gemini Flash\nDispatch Brief]
-    H --> H2[Gemini Pro\nStrategy Memo]
-    H --> H3[Embeddings\nSignal Fingerprint]
+	C --> H[Google AI Services]
+	H --> H1[Gemini Flash\nDispatch Brief]
+	H --> H2[Gemini Pro\nStrategy Memo]
+	H --> H3[Embeddings\nSignal Fingerprint]
 
-    E --> I[Sync to HQ Driver Warehouse]
-    F --> I
-    G --> I
-    H1 --> I
-    H2 --> I
-    H3 --> I
+	E --> I[Sync to HQ Driver Warehouse]
+	F --> I
+	G --> I
+	H1 --> I
+	H2 --> I
+	H3 --> I
 
-    I --> J[Action Execution\nReroute Transfer Delivery]
-    J --> K[Learning Memory Update]
-    K --> B
+	I --> J[Action Execution\nReroute Transfer Delivery]
+	J --> K[Learning Memory Update]
+	K --> B
 ```
 
 ## 7. Wireframes / Mock Diagrams (Text Mock)
@@ -106,7 +106,8 @@ flowchart TD
 | Driver Node                                                   |
 +---------------------+----------------------+-----------------+
 | Route Status        | Incident Feed         | HQ Signal       |
-+--------------------------------------------------------------+
+---------------------+----------------------+-----------------+
++---------------------+----------------------+-----------------+
 | Driver Map (current route + congestion + bypass)             |
 +--------------------------------------------------------------+
 | Buttons: Report Congestion | Confirm Reroute | Delivery Done  |
@@ -119,7 +120,8 @@ flowchart TD
 | Warehouse Node                                                |
 +---------------------+----------------------+-----------------+
 | Stock Posture       | Incoming Risk         | Transfer Queue  |
-+--------------------------------------------------------------+
+---------------------+----------------------+-----------------+
++---------------------+----------------------+-----------------+
 | Regional map + inbound links + driver overlay                |
 +--------------------------------------------------------------+
 | Buttons: Approve Transfer | Trigger Crisis Signal            |
@@ -129,25 +131,25 @@ flowchart TD
 ## 8. Architecture Diagram (Mermaid)
 ```mermaid
 flowchart LR
-    U1[HQ Web App]
-    U2[Driver Web App]
-    U3[Warehouse Web App]
+	U1[HQ Web App]
+	U2[Driver Web App]
+	U3[Warehouse Web App]
 
-    U1 <-->|Events/State| RT[Realtime Bus\nSupabase + BroadcastChannel]
-    U2 <-->|Events/State| RT
-    U3 <-->|Events/State| RT
+	U1 <-->|Events/State| RT[Realtime Bus\nSupabase + BroadcastChannel]
+	U2 <-->|Events/State| RT
+	U3 <-->|Events/State| RT
 
-    U1 --> MAP[Map + Routing Layer\nLeaflet + Route Providers]
-    U2 --> MAP
-    U3 --> MAP
+	U1 --> MAP[Map + Routing Layer\nLeaflet + Route Providers]
+	U2 --> MAP
+	U3 --> MAP
 
-    U1 --> API[Vercel Serverless API\n/api/gemini-brief]
-    API --> G1[Gemini 1.5 Flash]
-    API --> G2[Gemini 1.5 Pro]
-    API --> G3[text-embedding-004]
+	U1 --> API[Vercel Serverless API\n/api/gemini-brief]
+	API --> G1[Gemini 1.5 Flash]
+	API --> G2[Gemini 1.5 Pro]
+	API --> G3[text-embedding-004]
 
-    U1 --> FE[Feature Engines\nScoring Forecast Allocation]
-    FE --> MEM[Learning Memory\nLocal Storage]
+	U1 --> FE[Feature Engines\nScoring Forecast Allocation]
+	FE --> MEM[Learning Memory\nLocal Storage]
 ```
 
 ## 9. Technologies to Be Used in the Solution
